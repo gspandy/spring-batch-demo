@@ -1,0 +1,6 @@
+200001 zhangsan 18 86
+200002 lisi     19 87
+200003 wangwu   20 88
+200004 zhouliu  21 89
+200005 zhaoqi   22 90
+200006 liuba    23 91

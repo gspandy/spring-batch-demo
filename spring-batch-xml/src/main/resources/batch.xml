@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/batch
+       http://www.springframework.org/schema/batch/spring-batch.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="applicationContext.xml"/>
+
+    <batch:job id="xmlFileReadAndWriterJob">
+        <batch:step id="xmlFileReadAndWriterStep">
+            <batch:tasklet>
+                <batch:chunk reader="xmlReader" writer="xmlWriter"
+                             processor="xMLProcessor"
+                             commit-interval="10"/>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!-- XML文件读取 -->
+    <bean id="xmlReader" class="org.springframework.batch.item.xml.StaxEventItemReader" scope="step">
+        <!--根节点并不是指整个XML文件的根节点，而是指要读取的信息片段的根节点，
+        不管这个节点片段处在哪一层，框架都会遍历到-->
+        <property name="fragmentRootElementName" value="goods"/>
+        <property name="unmarshaller" ref="tradeMarshaller"/>
+        <property name="resource" value="classpath:#{jobParameters['inputFilePath']}"/>
+    </bean>
+
+    <!-- XML文件写入 -->
+    <bean id="xmlWriter" class="org.springframework.batch.item.xml.StaxEventItemWriter" scope="step">
+        <!--此处的根节点，指整个文件的跟节点，与读得时候稍有区别，从两个属性的名称上也可以看出-->
+        <property name="rootTagName" value="zhaoxing"/>
+        <property name="marshaller" ref="tradeMarshaller"/>
+        <property name="resource" value="classpath:#{jobParameters['outputFilePath']}"/>
+    </bean>
+
+    <bean id="tradeMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
+        <property name="aliases">
+            <util:map id="aliases">
+                <entry key="goods" value="com.xing.springbatch.xml.Goods"/>
+                <entry key="buyDay" value="java.util.Date"></entry>
+            </util:map>
+        </property>
+    </bean>
+
+</beans>
